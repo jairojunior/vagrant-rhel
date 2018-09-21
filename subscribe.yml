@@ -1,0 +1,30 @@
+---
+- hosts: all
+  become: yes
+
+  vars:
+    enabled_repos:
+      - rhel-7-server-rpms
+
+  tasks:
+
+    - name: Load credentials
+      include_vars: credentials.yml
+
+    - name: Subscribe RHN
+      redhat_subscription:
+        state: present
+        username: "{{ rhn_username }}"
+        password: "{{ rhn_password }}"
+        pool_ids: "{{ pool_id }}"
+
+    - name: Disable HTB repository
+      rhsm_repository:
+        name: rhel-7-server-htb-rpms
+        state: disabled
+
+    - name: Enable server 7 RPMs
+      rhsm_repository:
+        name: "{{ item }}"
+        state: enabled
+      with_items: "{{ enabled_repos }}" 
